@@ -1,16 +1,25 @@
 <template>
   <div class="layout">
-    <Sidebar />
-    <div class="main">
-      <Header />
+    <!-- Sidebar ONLY for allowed pages -->
+    <Sidebar v-if="showSidebar" />
+
+    <main class="content">
       <router-view />
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup>
-import Sidebar from "@/components/Sidebar.vue";
-import Header from "@/components/Header.vue";
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import Sidebar from '@/components/Sidebar.vue'
+
+const route = useRoute()
+
+/* Sidebar should appear ONLY on these pages */
+const showSidebar = computed(() => {
+  return route.name === 'ConfigureDashboard' || route.name === 'Dashboard'
+})
 </script>
 
 <style scoped>
@@ -19,9 +28,8 @@ import Header from "@/components/Header.vue";
   height: 100vh;
 }
 
-.main {
+.content {
   flex: 1;
-  background: #dbeafe;
-  overflow-y: auto;
 }
 </style>
+
