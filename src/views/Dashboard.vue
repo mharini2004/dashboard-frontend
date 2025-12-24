@@ -69,8 +69,8 @@
             <td>{{ formatDate(order.date) }}</td>
             <td>
               <button class="edit-btn" @click="editOrder(order)">Edit</button>
-              <button class="delete-btn" @click="orderStore.deleteOrder(order.id)">
-                Delete
+              <button class="delete-btn" @click="confirmDelete(order.id)">
+               Delete
               </button>
             </td>
           </tr>
@@ -107,6 +107,17 @@
       @save="handleSave"
     />
   </div>
+  <div v-if="showConfirm" class="confirm-backdrop">
+  <div class="confirm-box">
+    <h3>Are you sure?</h3>
+    <p>This order will be permanently deleted.</p>
+
+    <div class="confirm-actions">
+      <button class="cancel-btn" @click="showConfirm = false">No</button>
+      <button class="delete-btn" @click="deleteOrderConfirmed">Yes</button>
+    </div>
+  </div>
+</div>
 </template>
 
 <script setup>
@@ -121,6 +132,8 @@ const orderStore = useCustomerOrderStore()
 const selectedRange = ref('7')
 const showModal = ref(false)
 const editingOrder = ref(null)
+const showConfirm = ref(false)
+const deleteId = ref(null)
 
 /* ---------- FILTER ---------- */
 const filteredOrders = computed(() => {
@@ -180,6 +193,17 @@ const ordersByStatus = computed(() => {
   }
 })
 
+const confirmDelete = (id) => {
+  deleteId.value = id
+  showConfirm.value = true
+}
+
+const deleteOrderConfirmed = () => {
+  orderStore.deleteOrder(deleteId.value)
+  showConfirm.value = false
+  deleteId.value = null
+}
+
 
 /* ---------- ACTIONS ---------- */
 const editOrder = (order) => {
@@ -188,17 +212,22 @@ const editOrder = (order) => {
 }
 
 const handleSave = (order) => {
-  if (order.id) {
-    orderStore.updateOrder(order)
+  if (editingOrder.value) {
+    orderStore.updateOrder({
+      ...order,
+      id: editingOrder.value.id
+    })
   } else {
     orderStore.addOrder({
-  ...order,
-  id: Date.now(),
-  date: new Date()
-})
+      ...order,
+      id: Date.now()
+    })
   }
+
+  editingOrder.value = null
   showModal.value = false
 }
+
 
 
 const formatDate = (date) => new Date(date).toLocaleDateString()
@@ -416,6 +445,45 @@ th:last-child {
   .kpi-grid {
     grid-template-columns: 1fr;
   }
+}
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.confirm-box {
+  background: white;
+  padding: 24px;
+  border-radius: 14px;
+  width: 360px;
+  text-align: center;
+}
+
+.confirm-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.cancel-btn {
+  background: #e5e7eb;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
 }
 
 
