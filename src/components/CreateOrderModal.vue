@@ -64,11 +64,14 @@
 
       <!-- ACTIONS -->
       <div class="actions">
-       <p v-if="errorMessage" class="error-msg">
+       <p v-if="errorMessage" class="error-text">
   {{ errorMessage }}
 </p>
         <button @click="$emit('close')">Cancel</button>
-        <button class="save" @click="saveOrder">Create Order</button>
+        <button type="button" class="save" @click="saveOrder">
+  Create Order
+</button>
+
       </div>
     </div>
   </div>
@@ -144,23 +147,26 @@ const totalAmount = computed(() => `₹ ${form.quantity * form.unitPrice}`)
 
 const saveOrder = () => {
   if (
-  !form.firstName ||
-  !form.lastName ||
-  !form.email ||
-  !form.phone ||
-  !form.product ||
-  form.quantity <= 0 ||
-  form.unitPrice <= 0
-) {
-  errorMessage.value = 'Please select product and valid quantity'
-  return
-}
-
+    !form.firstName ||
+    !form.lastName ||
+    !form.email ||
+    !form.phone ||
+    !form.address ||
+    !form.city ||
+    !form.state ||
+    !form.postalCode ||
+    !form.country ||
+    !form.product ||
+    !form.quantity ||
+    form.unitPrice === 0
+  ) {
+    errorMessage.value = 'Please fill all mandatory fields before creating order'
+    return
+  }
 
   errorMessage.value = ''
 
   emit('save', {
-  id: form.id,
   customerId: 'CUST-' + Date.now(),
   customer: `${form.firstName} ${form.lastName}`,
   email: form.email,
@@ -175,7 +181,7 @@ const saveOrder = () => {
   date: new Date()
 })
 
-  emit('close')
+emit('close')
 }
 
 
@@ -269,6 +275,12 @@ input, select {
   color: #dc2626;
   font-size: 14px;
   margin-bottom: 12px;
+}
+.error-msg {
+  color: #dc2626;
+  font-size: 14px;
+  margin-right: auto;
+  font-weight: 500;
 }
 
 </style>
